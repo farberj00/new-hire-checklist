@@ -3,762 +3,869 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Week 1: Employee Onboarding Checklist</title>
+    <title>Day 1 Orientation & Core Policies Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiluLa0pJYGFupERwbiYpBXtLMNcmzXNM",
+            authDomain: "day1-training-tracker.firebaseapp.com",
+            projectId: "day1-training-tracker",
+            storageBucket: "day1-training-tracker.firebasestorage.app",
+            messagingSenderId: "548137297985",
+            appId: "1:548137297985:web:86bcc838443dd090c9bec0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions available globally
+        window.firebaseDB = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreServerTimestamp = serverTimestamp;
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }
-        
-        .checklist-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: 20px 0;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #4285f4;
-        }
-        
-        .header h1 {
-            color: #2c3e50;
-            margin: 0;
-            font-size: 2.2em;
-        }
-        
-        .header h2 {
-            color: #666;
-            margin: 5px 0 0 0;
-            font-size: 1.2em;
-            font-weight: normal;
-        }
-        
-        .employee-info {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border-left: 4px solid #4285f4;
-        }
-        
-        .employee-info input {
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-            width: 200px;
-        }
-        
-        .employee-info input:focus {
-            outline: none;
-            border-bottom: 2px solid #4285f4;
+            font-family: 'Montserrat', sans-serif;
         }
         
         .progress-bar {
-            background: #e0e0e0;
-            border-radius: 10px;
-            height: 20px;
-            margin: 20px 0;
-            position: relative;
-            overflow: hidden;
+            transition: width 0.5s ease-in-out;
         }
         
-        .progress-fill {
-            background: linear-gradient(90deg, #4285f4, #34a853);
-            height: 100%;
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.5s ease;
-            position: relative;
+        .celebration {
+            animation: celebrationBounce 0.8s ease-in-out;
         }
         
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
+        @keyframes celebrationBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
         
-        .checklist-item {
-            margin: 15px 0;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+        .section-card {
             transition: all 0.3s ease;
-            background: white;
         }
         
-        .checklist-item:hover {
-            border-color: #4285f4;
-            box-shadow: 0 2px 8px rgba(66, 133, 244, 0.1);
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
-        .checklist-item.completed {
-            border-color: #34a853;
-            background: #f8fff8;
+        .training-item {
+            transition: all 0.2s ease;
         }
         
-        .item-header {
+        .training-item:hover {
+            transform: translateX(4px);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .icon-circle {
+            width: 40px;
+            height: 40px;
             display: flex;
-            align-items: flex-start;
-            cursor: pointer;
-            user-select: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 18px;
         }
         
-        .checkbox {
+        .progress-circle {
             width: 20px;
             height: 20px;
-            border: 2px solid #ccc;
+            border: 2px solid #374151;
             border-radius: 4px;
-            margin-right: 15px;
-            margin-top: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-        
-        .checkbox.checked {
-            background: #34a853;
-            border-color: #34a853;
-            color: white;
-        }
-        
-        .item-title {
-            font-weight: bold;
-            font-size: 16px;
-            color: #2c3e50;
-            flex: 1;
-        }
-        
-        .item-title.completed {
-            text-decoration: line-through;
-            color: #666;
-        }
-        
-        .item-title a {
-            color: #4285f4;
-            text-decoration: none;
-        }
-        
-        .item-title a:hover {
-            text-decoration: underline;
-        }
-        
-        .sub-items {
-            margin-left: 35px;
-            margin-top: 10px;
-        }
-        
-        .sub-item {
-            display: flex;
-            align-items: flex-start;
-            margin: 8px 0;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .sub-checkbox {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #ccc;
-            border-radius: 3px;
-            margin-right: 10px;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-        
-        .sub-checkbox.checked {
-            background: #4285f4;
-            border-color: #4285f4;
-            color: white;
-        }
-        
-        .sub-item-text {
-            color: #555;
-            font-size: 14px;
-            flex: 1;
-        }
-        
-        .sub-item-text.completed {
-            text-decoration: line-through;
-            color: #999;
-        }
-        
-        .collapsible {
-            background-color: #f8f9fa;
-            color: #333;
-            cursor: pointer;
-            padding: 10px;
-            width: 100%;
-            border: 1px solid #ddd;
-            text-align: left;
-            outline: none;
-            font-size: 14px;
-            border-radius: 4px;
-            margin: 5px 0;
-            transition: background-color 0.3s ease;
-        }
-        
-        .collapsible:hover {
-            background-color: #e9ecef;
-        }
-        
-        .collapsible.active {
-            background-color: #4285f4;
-            color: white;
-        }
-        
-        .collapsible:after {
-            content: '\002B'; /* Plus sign */
-            color: #333;
-            font-weight: bold;
-            float: right;
-            margin-left: 5px;
-        }
-        
-        .collapsible.active:after {
-            content: "\2212"; /* Minus sign */
-            color: white;
-        }
-        
-        .collapsible-content {
-            padding: 0 15px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-        }
-        
-        .collapsible-content.active {
-            padding: 15px;
-            max-height: 500px;
-        }
-        
-        .completion-banner {
-            background: linear-gradient(135deg, #ffd700, #ffb300);
-            color: #333;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px 0;
-            display: none;
-            animation: celebration 0.6s ease-in-out;
-        }
-        
-        @keyframes celebration {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        .completion-banner h2 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
-        }
-        
-        .action-buttons {
-            margin-top: 25px;
-            text-align: center;
-        }
-        
-        .btn {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 0 10px;
-            transition: background 0.3s ease;
-        }
-        
-        .btn:hover {
-            background: #3367d6;
-        }
-        
-        .btn.secondary {
-            background: #6c757d;
-        }
-        
-        .btn.secondary:hover {
-            background: #5a6268;
-        }
-        
-        .completion-stats {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .stat-item {
-            display: inline-block;
-            margin: 0 20px;
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4285f4;
-            display: block;
-        }
-        
-        .stat-label {
             font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
+            font-weight: 600;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            min-width: 20px;
+            min-height: 20px;
+        }
+        
+        .progress-circle.completed {
+            background-color: #22c55e;
+            border-color: #22c55e;
+            color: white;
+        }
+        
+        .progress-circle.completed::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+        
+        .completed-item {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .trophy-animation {
+            animation: trophy 1s ease-in-out;
+        }
+        
+        @keyframes trophy {
+            0% { transform: scale(0) rotate(180deg); }
+            50% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .submit-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
-<body>
-    <div class="checklist-container">
-        <div class="header">
-            <h1>Week 1: Employee Onboarding Checklist</h1>
-            <p>Complete these tasks during your first week</p>
-        </div>
-        
-        <div class="employee-info">
-            <strong>Employee Name:</strong> 
-            <input type="text" id="employeeName" placeholder="Enter your name" onchange="saveProgress()">
-        </div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill">
-                <div class="progress-text" id="progressText">0%</div>
-            </div>
-        </div>
-        
-        <div class="completion-stats">
-            <div class="stat-item">
-                <span class="stat-number" id="completedCount">0</span>
-                <span class="stat-label">Completed</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="totalCount">0</span>
-                <span class="stat-label">Total Tasks</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="remainingCount">0</span>
-                <span class="stat-label">Remaining</span>
-            </div>
-        </div>
-        
-        <div class="completion-banner" id="completionBanner">
-            <h2>Congratulations!</h2>
-            <p><span id="congratsName"></span>You have completed all Week 1 onboarding tasks!</p>
-            <p>Welcome to the Walks Wiggles and Wags team!</p>
-        </div>
-        
-        <!-- Checklist Items -->
-        <div class="checklist-item" data-id="adp">
-            <div class="item-header" onclick="toggleMainItem('adp')">
-                <div class="checkbox" id="checkbox-adp"></div>
-                <div class="item-title" id="title-adp">Set up ADP Payroll account</div>
-            </div>
-        </div>
-        
-        <div class="checklist-item" data-id="paperwork">
-            <div class="item-header" onclick="toggleMainItem('paperwork')">
-                <div class="checkbox" id="checkbox-paperwork"></div>
-                <div class="item-title" id="title-paperwork">Complete onboarding paperwork (W4, I-9)</div>
-            </div>
-        </div>
-        
-        <div class="checklist-item" data-id="w2">
-            <div class="item-header" onclick="toggleMainItem('w2')">
-                <div class="checkbox" id="checkbox-w2"></div>
-                <div class="item-title" id="title-w2">Sign up for paperless W-2 delivery</div>
-            </div>
-        </div>
-        
-        <div class="checklist-item" data-id="adp-app">
-            <div class="item-header" onclick="toggleMainItem('adp-app')">
-                <div class="checkbox" id="checkbox-adp-app"></div>
-                <div class="item-title" id="title-adp-app">Download the ADP Run app</div>
-            </div>
-        </div>
-        
-        <div class="checklist-item" data-id="ttp-app">
-            <div class="item-header" onclick="toggleMainItem('ttp-app')">
-                <div class="checkbox" id="checkbox-ttp-app"></div>
-                <div class="item-title" id="title-ttp-app">Download Time To Pet app & fill out all required fields</div>
-            </div>
-            <div class="sub-items">
-                <button class="collapsible" onclick="toggleCollapsible(this)">Required Time To Pet Fields (Click to expand)</button>
-                <div class="collapsible-content">
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'phone')">
-                        <div class="sub-checkbox" id="sub-ttp-app-phone"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-phone">Phone Number</div>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-8">
+    <div id="progressTracker" class="max-w-6xl mx-auto p-6 bg-white rounded-2xl shadow-2xl border border-gray-200">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <div class="mb-4 md:mb-0">
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Day 1: Orientation & Core Policies
+                    </h1>
+                    <p class="text-gray-600 text-lg mt-2">Complete all training modules to finish your first day</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <div class="relative">
+                        <div class="w-24 h-24 mx-auto md:mx-0 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mb-2">
+                            <div id="overallProgress" class="text-2xl font-bold text-white">0%</div>
+                        </div>
+                        <div class="text-sm text-gray-500 font-medium">Overall Complete</div>
                     </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'emergency')">
-                        <div class="sub-checkbox" id="sub-ttp-app-emergency"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-emergency">Emergency Contact and Phone Number</div>
+                </div>
+            </div>
+
+            <!-- How to use instructions -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+                <div class="flex items-start">
+                    <div class="text-2xl mr-3">💡</div>
+                    <div>
+                        <p class="text-sm text-blue-800">
+                            <strong>How to use:</strong> Click on any training item to mark it as complete. 
+                            Complete all modules and check the acknowledgment to enable the Submit button.
+                            <span id="nameGreeting" class="block mt-1 font-semibold"></span>
+                        </p>
                     </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'address')">
-                        <div class="sub-checkbox" id="sub-ttp-app-address"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-address">Full address</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'birthdate')">
-                        <div class="sub-checkbox" id="sub-ttp-app-birthdate"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-birthdate">Birth Date</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'hiredate')">
-                        <div class="sub-checkbox" id="sub-ttp-app-hiredate"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-hiredate">Hire Date</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'bio')">
-                        <div class="sub-checkbox" id="sub-ttp-app-bio"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-bio">Write short bio (web version of TTP)</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'photo')">
-                        <div class="sub-checkbox" id="sub-ttp-app-photo"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-photo">Upload profile picture (web version of TTP)</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'timeoff')">
-                        <div class="sub-checkbox" id="sub-ttp-app-timeoff"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-timeoff">Request time off for any previously planned vacations and days off</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'schedule')">
-                        <div class="sub-checkbox" id="sub-ttp-app-schedule"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-schedule">Set your weekly schedule (hours not available to work)</div>
-                    </div>
-                    <div class="sub-item" onclick="toggleSubItem('ttp-app', 'features')">
-                        <div class="sub-checkbox" id="sub-ttp-app-features"></div>
-                        <div class="sub-item-text" id="subtext-ttp-app-features">Familiarize yourself with basic features like clocking in and out, logging mileage, viewing your schedule, starting an event timer</div>
+                </div>
+            </div>
+
+            <!-- Employee Name Input -->
+            <div class="mb-6">
+                <label for="employeeName" class="block text-sm font-medium text-gray-700 mb-2">Employee Name</label>
+                <input
+                    type="text"
+                    id="employeeName"
+                    placeholder="Enter your name to personalize your experience"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+            </div>
+
+            <!-- Overall Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-semibold text-gray-700">Training Progress</span>
+                    <span id="progressFraction" class="text-sm font-semibold text-gray-600">0 / 34 completed</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-6 shadow-inner">
+                    <div 
+                        id="overallProgressBar"
+                        class="bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 h-6 rounded-full progress-bar flex items-center justify-center relative overflow-hidden"
+                        style="width: 0%"
+                    >
+                        <div class="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                        <span id="progressText" class="text-white text-sm font-bold relative z-10" style="display: none;">0%</span>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="checklist-item" data-id="story">
-            <div class="item-header" onclick="toggleMainItem('story')">
-                <div class="checkbox" id="checkbox-story"></div>
-                <div class="item-title" id="title-story">
-                    <a href="https://sites.google.com/d/1JoxHU-s_UE4QXiEO5Nri7hKEfKWiaqBl/p/1zg2oE0oqjXZ0Y_d1Ttcv69E1ELeEFz7d/edit?authuser=4" target="_blank">Review Our Story & Meet the Team</a>
+
+        <!-- Celebration Banner -->
+        <div id="celebration" class="mb-8 p-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-2xl text-center celebration shadow-lg" style="display: none;">
+            <div class="flex items-center justify-center mb-3">
+                <span class="text-4xl trophy-animation">🏆</span>
+                <span class="text-white font-bold text-2xl mx-3">All Modules Complete!</span>
+                <span class="text-4xl trophy-animation">🎉</span>
+            </div>
+            <p class="text-white text-lg font-medium" id="celebrationText">
+                You've completed all training modules! Don't forget to check the acknowledgment and submit.
+            </p>
+            <div class="mt-4">
+                <span class="inline-block bg-white bg-opacity-20 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                    Ready for Acknowledgment ✨
+                </span>
+            </div>
+        </div>
+
+        <!-- Section Progress Cards -->
+        <div class="space-y-8 mb-8">
+            <!-- Module 1: Payroll & Paperwork -->
+            <div class="section-card bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border-2 border-blue-200 shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-800">Module 1: Payroll & Paperwork</h3>
+                        <p class="text-sm text-gray-600">Before you begin, check your email for a message from ADP with instructions to self-onboard. This email is your access point to set up payroll & complete required forms.</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="module1Percent" class="text-2xl font-bold text-blue-600">0%</div>
+                        <div class="text-xs text-gray-500">Complete</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="w-full bg-blue-200 rounded-full h-3">
+                        <div 
+                            id="module1Progress"
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full progress-bar"
+                            style="width: 0%"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4" id="module1Items">
+                    <!-- Items will be generated by JavaScript -->
+                </div>
+
+                <div class="pt-4 border-t border-blue-200">
+                    <div class="flex justify-between items-center">
+                        <span id="module1Summary" class="text-sm text-gray-600">0 of 9 completed</span>
+                        <span id="module1Complete" class="text-sm text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full" style="display: none;">
+                            ✓ Module Complete
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2: Time To Pet Setup -->
+            <div class="section-card bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border-2 border-green-200 shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-800">Module 2: Time To Pet Setup</h3>
+                        <p class="text-sm text-gray-600">Account setup and app training</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="module2Percent" class="text-2xl font-bold text-green-600">0%</div>
+                        <div class="text-xs text-gray-500">Complete</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="w-full bg-green-200 rounded-full h-3">
+                        <div 
+                            id="module2Progress"
+                            class="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full progress-bar"
+                            style="width: 0%"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4" id="module2Items">
+                    <!-- Items will be generated by JavaScript -->
+                </div>
+
+                <div class="pt-4 border-t border-green-200">
+                    <div class="flex justify-between items-center">
+                        <span id="module2Summary" class="text-sm text-gray-600">0 of 11 completed</span>
+                        <span id="module2Complete" class="text-sm text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full" style="display: none;">
+                            ✓ Module Complete
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 3: Company Story & Culture -->
+            <div class="section-card bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border-2 border-orange-200 shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-800">Module 3: Our Story, Mission, Vision & Culture</h3>
+                        <p class="text-sm text-gray-600">Get to know our company and what we stand for by reviewing the following</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="module3Percent" class="text-2xl font-bold text-orange-600">0%</div>
+                        <div class="text-xs text-gray-500">Complete</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="w-full bg-orange-200 rounded-full h-3">
+                        <div 
+                            id="module3Progress"
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full progress-bar"
+                            style="width: 0%"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4" id="module3Items">
+                    <!-- Items will be generated by JavaScript -->
+                </div>
+
+                <div class="pt-4 border-t border-orange-200">
+                    <div class="flex justify-between items-center">
+                        <span id="module3Summary" class="text-sm text-gray-600">0 of 4 completed</span>
+                        <span id="module3Complete" class="text-sm text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full" style="display: none;">
+                            ✓ Module Complete
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 4: Core Company Policies -->
+            <div class="section-card bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+                <div class="flex items-center mb-6">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-800">Module 4: Core Company Policies</h3>
+                        <p class="text-sm text-gray-600">Review the following essential company policies</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="module4Percent" class="text-2xl font-bold text-purple-600">0%</div>
+                        <div class="text-xs text-gray-500">Complete</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="w-full bg-purple-200 rounded-full h-3">
+                        <div 
+                            id="module4Progress"
+                            class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full progress-bar"
+                            style="width: 0%"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-4" id="module4Items">
+                    <!-- Items will be generated by JavaScript -->
+                </div>
+
+                <div class="pt-4 border-t border-purple-200">
+                    <div class="flex justify-between items-center">
+                        <span id="module4Summary" class="text-sm text-gray-600">0 of 10 completed</span>
+                        <span id="module4Complete" class="text-sm text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full" style="display: none;">
+                            ✓ Module Complete
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="checklist-item" data-id="mission">
-            <div class="item-header" onclick="toggleMainItem('mission')">
-                <div class="checkbox" id="checkbox-mission"></div>
-                <div class="item-title" id="title-mission">
-                    <a href="https://sites.google.com/d/1JoxHU-s_UE4QXiEO5Nri7hKEfKWiaqBl/p/18wdTPfIog9cRzBI7grp3-6zcmgMhq4Wx/edit?authuser=4" target="_blank">Review Mission, Vision, & Values</a>
+
+        <!-- Progress Summary Dashboard -->
+        <div class="mb-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+            <h4 class="text-xl font-bold text-gray-800 mb-6 text-center">Module Summary Dashboard</h4>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center p-4 bg-white rounded-xl shadow-md border border-blue-100">
+                    <div id="module1Sum" class="text-3xl font-bold text-blue-600 mb-1">0%</div>
+                    <div class="text-sm text-gray-600 font-medium">Module 1: Payroll & Paperwork</div>
+                </div>
+                <div class="text-center p-4 bg-white rounded-xl shadow-md border border-green-100">
+                    <div id="module2Sum" class="text-3xl font-bold text-green-600 mb-1">0%</div>
+                    <div class="text-sm text-gray-600 font-medium">Module 2: Time to Pet Setup</div>
+                </div>
+                <div class="text-center p-4 bg-white rounded-xl shadow-md border border-orange-100">
+                    <div id="module3Sum" class="text-3xl font-bold text-orange-600 mb-1">0%</div>
+                    <div class="text-sm text-gray-600 font-medium">Module 3: Company Culture</div>
+                </div>
+                <div class="text-center p-4 bg-white rounded-xl shadow-md border border-purple-100">
+                    <div id="module4Sum" class="text-3xl font-bold text-purple-600 mb-1">0%</div>
+                    <div class="text-sm text-gray-600 font-medium">Module 4: Company Policies</div>
                 </div>
             </div>
         </div>
-        
-        <div class="checklist-item" data-id="culture">
-            <div class="item-header" onclick="toggleMainItem('culture')">
-                <div class="checkbox" id="checkbox-culture"></div>
-                <div class="item-title" id="title-culture">
-                    <a href="https://sites.google.com/d/1JoxHU-s_UE4QXiEO5Nri7hKEfKWiaqBl/p/1ZidKckYaIfadxM5Qx0qA-vmxcKUV0OXG/edit?authuser=4" target="_blank">Review Company Culture</a>
+
+        <!-- Action Buttons -->
+        <div class="mb-6 flex justify-center">
+            <button 
+                id="saveButton"
+                class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+            >
+                💾 Save Progress
+            </button>
+        </div>
+
+        <!-- Acknowledgment Section -->
+        <div class="mb-8 p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-2xl border-2 border-red-200 shadow-lg">
+            <h4 class="text-xl font-bold text-gray-800 mb-4 text-center">Final Acknowledgment</h4>
+            <div class="bg-white p-6 rounded-xl border border-red-200">
+                <div class="flex items-start">
+                    <input 
+                        type="checkbox" 
+                        id="acknowledgmentCheckbox" 
+                        class="mt-1 mr-4 h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                    />
+                    <label for="acknowledgmentCheckbox" class="text-gray-800 font-medium cursor-pointer">
+                        I acknowledge that I have read, understood and completed ALL tasks within Day 1: Orientation and Core Policies
+                    </label>
                 </div>
             </div>
         </div>
-        
-        <div class="checklist-item" data-id="policies">
-            <div class="item-header" onclick="toggleMainItem('policies')">
-                <div class="checkbox" id="checkbox-policies"></div>
-                <div class="item-title" id="title-policies">
-                    <a href="https://sites.google.com/d/1JoxHU-s_UE4QXiEO5Nri7hKEfKWiaqBl/p/1IeQFxCIS3WEVKaAp6KiWxNEF2kkpdnZ7/edit" target="_blank">Review Core Company Policies</a>
-                </div>
-            </div>
-            <div class="sub-items">
-                <div class="sub-item" onclick="toggleSubItem('policies', 'handbook')">
-                    <div class="sub-checkbox" id="sub-policies-handbook"></div>
-                    <div class="sub-item-text" id="subtext-policies-handbook"><strong>Employee Handbook Overview</strong></div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'confidentiality')">
-                    <div class="sub-checkbox" id="sub-policies-confidentiality"></div>
-                    <div class="sub-item-text" id="subtext-policies-confidentiality">Confidentiality & Privacy Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'attendance')">
-                    <div class="sub-checkbox" id="sub-policies-attendance"></div>
-                    <div class="sub-item-text" id="subtext-policies-attendance">Attendance & Punctuality Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'timeoff')">
-                    <div class="sub-checkbox" id="sub-policies-timeoff"></div>
-                    <div class="sub-item-text" id="subtext-policies-timeoff">Time Off & Schedule Change Request Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'dress')">
-                    <div class="sub-checkbox" id="sub-policies-dress"></div>
-                    <div class="sub-item-text" id="subtext-policies-dress">Dress Code & Uniform Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'equipment')">
-                    <div class="sub-checkbox" id="sub-policies-equipment"></div>
-                    <div class="sub-item-text" id="subtext-policies-equipment">Equipment & Supplies Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'safety')">
-                    <div class="sub-checkbox" id="sub-policies-safety"></div>
-                    <div class="sub-item-text" id="subtext-policies-safety">Safety & Safety Basics Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'boundaries')">
-                    <div class="sub-checkbox" id="sub-policies-boundaries"></div>
-                    <div class="sub-item-text" id="subtext-policies-boundaries">Professional Boundaries Policy</div>
-                </div>
-                <div class="sub-item" onclick="toggleSubItem('policies', 'substance')">
-                    <div class="sub-checkbox" id="sub-policies-substance"></div>
-                    <div class="sub-item-text" id="subtext-policies-substance"><strong>Substance-Free Workplace Policy</strong></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="btn" onclick="saveProgress()">Save Progress</button>
-            <button class="btn secondary" onclick="resetChecklist()">Reset All</button>
-            <button class="btn secondary" onclick="printChecklist()">Print Checklist</button>
+
+        <!-- Submit Button -->
+        <div class="mb-6 flex justify-center">
+            <button 
+                id="submitButton"
+                class="submit-disabled text-black font-bold py-4 px-8 rounded-xl transition-all transform shadow-lg"
+                style="background-color: #11d9f3;"
+                disabled
+            >
+                📨 Submit Acknowledgment
+            </button>
         </div>
     </div>
-    
+
     <script>
-        let checklistData = {
-            mainItems: {},
-            subItems: {},
-            employeeName: ''
+        // Initialize EmailJS
+        emailjs.init("u6gnveZG6T3TdyZF2");
+
+        // Training data structure
+        const trainingData = {
+            module1: [
+                '<strong style="font-size: 18px;">Sign up for MyADP using the link in your onboarding email</strong>',
+                '     <span style="font-size: 18px;">Complete Personal Info, W-4, and Direct Deposit directly in MyADP</span>',
+                '     <span style="font-size: 18px;">Review and sign off on the Employee Handbook within ADP</span>',
+                '     <span style="font-size: 18px;">Opt in to Paperless W-2 Delivery to ensure secure, fast access at tax time</span>',
+                '     <span style="font-size: 18px;">Download the ADP Run App (iOS or Android) for mobile access to payroll and pay stubs</span>',
+                '<strong style="font-size: 18px;">Form I-9 Employment Eligibility</strong>',
+                '     <span style="font-size: 18px;">Download & complete Sections 1 & 2</span>',
+                '     <span style="font-size: 18px;">Provide required identification documents</span>',
+                '     <span style="font-size: 18px;">A wet signature is required. Return the completed form as instructed</span>'
+            ],
+            module2: [
+                '<strong style="font-size: 18px;">Create your Time To Pet (TTP) account via web, not app, and fill out the following fields:</strong>',
+                '     <span style="font-size: 18px;">Personal info (phone, emergency contact, address, birth date, hire date)</span>',
+                '     <span style="font-size: 18px;">Upload profile photo & short bio</span>',
+                '     <span style="font-size: 18px;">Set schedule & request any pre-planned time off</span>',
+                '<strong style="font-size: 18px;">Learn how to:</strong>',
+                '     <span style="font-size: 18px;">Clock in/out</span>',
+                '     <span style="font-size: 18px;">Log mileage</span>',
+                '     <span style="font-size: 18px;">View schedule</span>',
+                '     <span style="font-size: 18px;">Start/stop event timer</span>',
+                '<strong style="font-size: 18px;">Download Time To Pet app</strong>',
+                '<strong style="font-size: 18px;">Demo Video: Short screen-recording (2–3 mins)</strong>'
+            ],
+            module3: [
+                '<span style="font-size: 18px;">Our Story & Meet the Team</span>',
+                '<span style="font-size: 18px;">Mission, Vision & Values</span>',
+                '<span style="font-size: 18px;">Company Culture</span>',
+                '<span style="font-size: 18px;">Take the Company Culture Quiz</span>'
+            ],
+            module4: [
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1D3xy7zpnrI7Zztef00P9bF34UJsMZboa6xnJ2kmqUu0/edit?tab=t.0#heading=h.bv2bjhzf6h6q" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Employee Handbook Overview</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1NAM9jimnUKm8xScSG7cSV9-aHKlcvbu2h7cCBRfcFek/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Confidentiality & Privacy</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/11xkQXMKux7p3CVwGQ43lm2kLDVL7R8zoZpkWxdgW5yU/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Attendance & Punctuality</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1z4hPSJO1Cczt1YbnZknh5YZ-NO3EEXPMnwBnDckK_p4/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Time Off & Schedule Change Requests</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1F-fkPdt8Kk6WMpQmiI4zWVYUE1Kj1g30mxUYkhcTCSg/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Dress Code & Uniform</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1RoQEPTeDtLfy2CyZTI_h_RxLDT_0OiRxmuZA0fiEK1o/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Equipment & Supplies</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1L6Ze_dn3TBJyxSZ20akx7EkMc6XEBkCTvJPzCKKQZq4/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Safety & Security Basics</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1ncKpmKayhag7vXOU7-qDB5-ZB1tW6MqUW55TC5ru7Vo/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Professional Boundaries</a></strong>',
+                '<strong style="font-size: 18px;"><a href="https://docs.google.com/document/d/1mWsiI35PoRSHGKA37Jh8nspWippx6a182AyzMXV40h4/edit?tab=t.0#heading=h.7bethilgrvt4" target="_blank" class="text-purple-600 hover:text-purple-800 underline">Substance-Free Workplace</a></strong>',
+                '<strong style="font-size: 18px;">Quiz</strong>'
+            ]
         };
-        
-        let totalTasks = 0;
-        
-        function initializeChecklist() {
-            // Count total tasks
-            const mainItems = document.querySelectorAll('.checklist-item');
-            const subItems = document.querySelectorAll('.sub-item');
-            totalTasks = mainItems.length + subItems.length;
+
+        let completedItems = {};
+        let totalItems = 0;
+        let currentEmployeeName = '';
+        let isLoading = false;
+
+        // Calculate total items
+        Object.values(trainingData).forEach(items => {
+            totalItems += items.length;
+        });
+
+        // Firebase functions - Updated for multi-day structure
+        async function saveProgressToFirebase(employeeName, progressData) {
+            if (!employeeName || !window.firebaseDB) return;
             
-            // Load saved progress
-            loadProgress();
-            
-            // Update display
-            updateProgress();
-            updateStats();
-            
-            // Clear all checkboxes initially
-            clearAllCheckboxes();
-        }
-        
-        function clearAllCheckboxes() {
-            // Clear main item checkboxes
-            document.querySelectorAll('.checkbox').forEach(checkbox => {
-                checkbox.classList.remove('checked');
-                checkbox.innerHTML = '';
-            });
-            
-            // Clear sub item checkboxes
-            document.querySelectorAll('.sub-checkbox').forEach(checkbox => {
-                checkbox.classList.remove('checked');
-                checkbox.innerHTML = '';
-            });
-            
-            // Clear completed styling
-            document.querySelectorAll('.checklist-item').forEach(item => {
-                item.classList.remove('completed');
-            });
-            
-            document.querySelectorAll('.item-title, .sub-item-text').forEach(text => {
-                text.classList.remove('completed');
-            });
-        }
-        
-        function toggleMainItem(itemId) {
-            checklistData.mainItems[itemId] = !checklistData.mainItems[itemId];
-            updateItemDisplay(itemId);
-            updateProgress();
-            updateStats();
-            checkCompletion();
-            saveProgress();
-        }
-        
-        function toggleSubItem(parentId, subId) {
-            const fullId = `${parentId}-${subId}`;
-            checklistData.subItems[fullId] = !checklistData.subItems[fullId];
-            updateSubItemDisplay(parentId, subId);
-            checkParentCompletion(parentId);
-            updateProgress();
-            updateStats();
-            checkCompletion();
-            saveProgress();
-        }
-        
-        function toggleCollapsible(element) {
-            element.classList.toggle("active");
-            const content = element.nextElementSibling;
-            content.classList.toggle("active");
-        }
-        
-        function updateItemDisplay(itemId) {
-            const checkbox = document.getElementById(`checkbox-${itemId}`);
-            const title = document.getElementById(`title-${itemId}`);
-            const item = document.querySelector(`[data-id="${itemId}"]`);
-            
-            if (checklistData.mainItems[itemId]) {
-                checkbox.classList.add('checked');
-                checkbox.innerHTML = '✓';
-                title.classList.add('completed');
-                item.classList.add('completed');
-            } else {
-                checkbox.classList.remove('checked');
-                checkbox.innerHTML = '';
-                title.classList.remove('completed');
-                item.classList.remove('completed');
+            try {
+                const docRef = window.firestoreDoc(window.firebaseDB, 'employees', employeeName.toLowerCase().trim());
+                const trainingDayData = {
+                    completedItems: progressData,
+                    lastUpdated: window.firestoreServerTimestamp(),
+                    totalItems: totalItems
+                };
+                
+                // Update only the specific training day
+                await window.firestoreSetDoc(docRef, {
+                    employeeName: employeeName,
+                    training_days: {
+                        day1_orientation_core_policies: trainingDayData
+                    }
+                }, { merge: true }); // merge: true preserves other training days
+                
+                console.log('Day 1 progress saved to Firebase');
+            } catch (error) {
+                console.error('Error saving to Firebase:', error);
             }
         }
-        
-        function updateSubItemDisplay(parentId, subId) {
-            const fullId = `${parentId}-${subId}`;
-            const checkbox = document.getElementById(`sub-${fullId}`);
-            const text = document.getElementById(`subtext-${fullId}`);
+
+        async function loadProgressFromFirebase(employeeName) {
+            if (!employeeName || !window.firebaseDB) return null;
             
-            if (checklistData.subItems[fullId]) {
-                checkbox.classList.add('checked');
-                checkbox.innerHTML = '✓';
-                text.classList.add('completed');
-            } else {
-                checkbox.classList.remove('checked');
-                checkbox.innerHTML = '';
-                text.classList.remove('completed');
+            try {
+                const docRef = window.firestoreDoc(window.firebaseDB, 'employees', employeeName.toLowerCase().trim());
+                const docSnap = await window.firestoreGetDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Return only Day 1 progress
+                    return data.training_days?.day1_orientation_core_policies || null;
+                } else {
+                    console.log('No saved progress found');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+                return null;
             }
         }
-        
-        function checkParentCompletion(parentId) {
-            const subItems = document.querySelectorAll(`[id^="sub-${parentId}-"]`);
-            let allCompleted = true;
+
+        // Save acknowledgment completion
+        async function saveAcknowledmentToFirebase(employeeName) {
+            if (!employeeName || !window.firebaseDB) return;
             
-            subItems.forEach(subItem => {
-                const subId = subItem.id.replace(`sub-${parentId}-`, '');
-                const fullId = `${parentId}-${subId}`;
-                if (!checklistData.subItems[fullId]) {
-                    allCompleted = false;
+            try {
+                const docRef = window.firestoreDoc(window.firebaseDB, 'employees', employeeName.toLowerCase().trim());
+                await window.firestoreSetDoc(docRef, {
+                    training_days: {
+                        day1_orientation_core_policies: {
+                            acknowledgmentCompleted: true,
+                            submissionDate: window.firestoreServerTimestamp()
+                        }
+                    }
+                }, { merge: true });
+                
+                console.log('Day 1 acknowledgment saved to Firebase');
+            } catch (error) {
+                console.error('Error saving acknowledgment to Firebase:', error);
+            }
+        }
+
+        // Auto-save function
+        async function autoSave() {
+            if (currentEmployeeName && !isLoading) {
+                await saveProgressToFirebase(currentEmployeeName, completedItems);
+            }
+        }
+
+        // Initialize the widget
+        function initializeWidget() {
+            Object.keys(trainingData).forEach(section => {
+                const container = document.getElementById(`${section}Items`);
+                if (!container) {
+                    console.error(`Container not found for ${section}`);
+                    return;
+                }
+                
+                trainingData[section].forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    
+                    // Check if this is an indented sub-item
+                    const isSubItem = item.trim().length !== item.length; // Check if item starts with spaces
+                    const marginClass = isSubItem ? 'ml-6' : '';
+                    
+                    itemDiv.className = `training-item ${marginClass} flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-gray-200 hover:shadow-md`;
+                    itemDiv.onclick = () => toggleItem(section, index);
+                    
+                    // Create checkbox element
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'progress-circle mr-4 flex-shrink-0';
+                    checkbox.id = `${section}-${index}-icon`;
+                    
+                    // Create text element
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'text-sm font-medium text-gray-800 flex-1';
+                    textSpan.id = `${section}-${index}-text`;
+                    textSpan.innerHTML = item;
+                    
+                    itemDiv.appendChild(checkbox);
+                    itemDiv.appendChild(textSpan);
+                    container.appendChild(itemDiv);
+                });
+            });
+            updateAllProgress();
+            updateSubmitButton();
+        }
+
+        // Toggle item completion
+        function toggleItem(section, index) {
+            const key = `${section}-${index}`;
+            completedItems[key] = !completedItems[key];
+            
+            const icon = document.getElementById(`${key}-icon`);
+            const text = document.getElementById(`${key}-text`);
+            const container = icon.parentElement;
+            
+            if (completedItems[key]) {
+                icon.className = 'progress-circle completed mr-4 flex-shrink-0';
+                text.className = 'text-sm font-medium text-gray-600 line-through flex-1';
+                container.className = container.className.replace('training-item', 'training-item completed-item');
+            } else {
+                icon.className = 'progress-circle mr-4 flex-shrink-0';
+                text.className = 'text-sm font-medium text-gray-800 flex-1';
+                const isSubItem = trainingData[section][index].trim().length !== trainingData[section][index].length;
+                const marginClass = isSubItem ? 'ml-6' : '';
+                container.className = `training-item ${marginClass} flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-gray-200 hover:shadow-md`;
+            }
+            
+            updateAllProgress();
+            checkCelebration();
+            updateSubmitButton();
+            
+            // Auto-save after each change
+            autoSave();
+        }
+
+        // Load saved progress and update UI
+        async function loadSavedProgress(progressData) {
+            if (!progressData || !progressData.completedItems) return;
+            
+            isLoading = true;
+            completedItems = progressData.completedItems;
+            
+            Object.keys(completedItems).forEach(key => {
+                if (completedItems[key]) {
+                    const [section, index] = key.split('-');
+                    const icon = document.getElementById(`${key}-icon`);
+                    const text = document.getElementById(`${key}-text`);
+                    const container = icon?.parentElement;
+                    
+                    if (icon && text && container) {
+                        icon.className = 'progress-circle completed mr-4 flex-shrink-0';
+                        text.className = 'text-sm font-medium text-gray-600 line-through flex-1';
+                        container.className = container.className.replace('training-item', 'training-item completed-item');
+                    }
                 }
             });
             
-            if (subItems.length > 0) {
-                checklistData.mainItems[parentId] = allCompleted;
-                updateItemDisplay(parentId);
-            }
+            updateAllProgress();
+            updateSubmitButton();
+            isLoading = false;
         }
-        
-        function updateProgress() {
-            const completedMain = Object.values(checklistData.mainItems).filter(Boolean).length;
-            const completedSub = Object.values(checklistData.subItems).filter(Boolean).length;
-            const totalCompleted = completedMain + completedSub;
+
+        // Update all progress indicators
+        function updateAllProgress() {
+            Object.keys(trainingData).forEach(section => {
+                updateSectionProgress(section);
+            });
+            updateOverallProgress();
+        }
+
+        // Update section progress
+        function updateSectionProgress(section) {
+            const items = trainingData[section];
+            const completed = items.filter((_, index) => completedItems[`${section}-${index}`]).length;
+            const percentage = Math.round((completed / items.length) * 100);
             
-            const percentage = Math.round((totalCompleted / totalTasks) * 100);
+            document.getElementById(`${section}Progress`).style.width = `${percentage}%`;
+            document.getElementById(`${section}Percent`).textContent = `${percentage}%`;
+            document.getElementById(`${section}Summary`).textContent = `${completed} of ${items.length} completed`;
+            document.getElementById(`${section}Sum`).textContent = `${percentage}%`;
             
-            const progressFill = document.getElementById('progressFill');
+            const completeIndicator = document.getElementById(`${section}Complete`);
+            completeIndicator.style.display = percentage === 100 ? 'inline-block' : 'none';
+        }
+
+        // Update overall progress
+        function updateOverallProgress() {
+            const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            const percentage = Math.round((completed / totalItems) * 100);
+            
+            document.getElementById('overallProgress').textContent = `${percentage}%`;
+            document.getElementById('overallProgressBar').style.width = `${percentage}%`;
+            document.getElementById('progressFraction').textContent = `${completed} / ${totalItems} completed`;
+            
             const progressText = document.getElementById('progressText');
-            
-            progressFill.style.width = percentage + '%';
-            progressText.textContent = percentage + '%';
-        }
-        
-        function updateStats() {
-            const completedMain = Object.values(checklistData.mainItems).filter(Boolean).length;
-            const completedSub = Object.values(checklistData.subItems).filter(Boolean).length;
-            const totalCompleted = completedMain + completedSub;
-            
-            document.getElementById('completedCount').textContent = totalCompleted;
-            document.getElementById('totalCount').textContent = totalTasks;
-            document.getElementById('remainingCount').textContent = totalTasks - totalCompleted;
-        }
-        
-        function checkCompletion() {
-            const completedMain = Object.values(checklistData.mainItems).filter(Boolean).length;
-            const completedSub = Object.values(checklistData.subItems).filter(Boolean).length;
-            const totalCompleted = completedMain + completedSub;
-            
-            const banner = document.getElementById('completionBanner');
-            const congratsName = document.getElementById('congratsName');
-            
-            if (totalCompleted === totalTasks) {
-                const name = checklistData.employeeName;
-                congratsName.textContent = name ? `${name}, ` : '';
-                banner.style.display = 'block';
+            if (percentage > 15) {
+                progressText.style.display = 'block';
+                progressText.textContent = `${percentage}%`;
             } else {
-                banner.style.display = 'none';
+                progressText.style.display = 'none';
             }
         }
-        
-        function saveProgress() {
-            const employeeNameInput = document.getElementById('employeeName');
-            checklistData.employeeName = employeeNameInput.value;
+
+        // Check for celebration
+        function checkCelebration() {
+            const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            if (completed === totalItems) {
+                const celebration = document.getElementById('celebration');
+                celebration.style.display = 'block';
+                setTimeout(() => {
+                    celebration.style.display = 'none';
+                }, 8000);
+            }
+        }
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            const acknowledgmentChecked = document.getElementById('acknowledgmentCheckbox').checked;
+            const submitButton = document.getElementById('submitButton');
             
-            const progress = JSON.stringify(checklistData);
-            localStorage.setItem('week1_onboarding_progress', progress);
-        }
-        
-        function loadProgress() {
-            const saved = localStorage.getItem('week1_onboarding_progress');
-            if (saved) {
-                checklistData = JSON.parse(saved);
-                
-                // Load employee name
-                document.getElementById('employeeName').value = checklistData.employeeName || '';
-                
-                // Update all displays
-                Object.keys(checklistData.mainItems).forEach(itemId => {
-                    if (checklistData.mainItems[itemId]) {
-                        updateItemDisplay(itemId);
-                    }
-                });
-                
-                Object.keys(checklistData.subItems).forEach(fullId => {
-                    if (checklistData.subItems[fullId]) {
-                        const parts = fullId.split('-');
-                        const parentId = parts[0];
-                        const subId = parts.slice(1).join('-');
-                        updateSubItemDisplay(parentId, subId);
-                    }
-                });
+            const allComplete = completed === totalItems && acknowledgmentChecked;
+            
+            if (allComplete) {
+                submitButton.disabled = false;
+                submitButton.className = 'text-black font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg';
+                submitButton.style.backgroundColor = '#11d9f3';
+            } else {
+                submitButton.disabled = true;
+                submitButton.className = 'submit-disabled text-black font-bold py-4 px-8 rounded-xl transition-all transform shadow-lg';
+                submitButton.style.backgroundColor = '#11d9f3';
             }
         }
-        
-        function resetChecklist() {
-            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-                checklistData = { mainItems: {}, subItems: {}, employeeName: '' };
-                document.getElementById('employeeName').value = '';
-                clearAllCheckboxes();
-                updateProgress();
-                updateStats();
-                document.getElementById('completionBanner').style.display = 'none';
-                localStorage.removeItem('week1_onboarding_progress');
+
+        // Generate modules completed summary
+        function getModulesCompletedSummary() {
+            let summary = '';
+            Object.keys(trainingData).forEach(section => {
+                const items = trainingData[section];
+                const completed = items.filter((_, index) => completedItems[`${section}-${index}`]).length;
+                const percentage = Math.round((completed / items.length) * 100);
+                const moduleName = {
+                    'module1': 'Module 1: Payroll & Paperwork',
+                    'module2': 'Module 2: Time To Pet Setup',
+                    'module3': 'Module 3: Our Story, Mission & Culture',
+                    'module4': 'Module 4: Core Company Policies'
+                }[section];
+                
+                summary += `${moduleName} - ${percentage}% Complete (${completed}/${items.length})\n`;
+            });
+            return summary;
+        }
+
+        // Submit acknowledgment
+        function submitAcknowledgment() {
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            const acknowledgmentChecked = document.getElementById('acknowledgmentCheckbox').checked;
+
+            // Validation checks
+            if (!employeeName) {
+                alert('Please enter your name at the beginning of the checklist to complete, enter your name and click Submit again');
+                return;
             }
+
+            if (completed !== totalItems) {
+                alert('It looks like you have not completed all the tasks, please go back and complete tasks and ensure you have checked off the tasks in the checklist');
+                return;
+            }
+
+            if (!acknowledgmentChecked) {
+                alert('Please check the acknowledgment checkbox to confirm you have completed all tasks');
+                return;
+            }
+
+            // Prepare email data
+            const templateParams = {
+                employee_name: employeeName,
+                acknowledge_date: new Date().toLocaleDateString(),
+                acknowledge_checkbox: 'Confirmed',
+                modules_completed: getModulesCompletedSummary()
+            };
+
+            // Send email via EmailJS
+            emailjs.send('service_od1iofm', 'template_z5d6izs', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // Save acknowledgment completion to Firebase
+                    saveAcknowledmentToFirebase(employeeName);
+                    
+                    alert('Congratulations on completing your first days training modules for "New Hire: Orientation and Core Polices", when ready you can begin Day 2 Training');
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    alert('Acknowledgement email failed to send, please call Monica and inform her of the error');
+                });
         }
-        
-        function printChecklist() {
-            window.print();
-        }
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initializeChecklist);
-        
-        // Save progress when employee name changes
-        document.getElementById('employeeName').addEventListener('input', saveProgress);
+
+        // Event listeners
+        document.getElementById('employeeName').addEventListener('input', async function() {
+            const name = this.value.trim();
+            const greeting = document.getElementById('nameGreeting');
+            
+            if (name) {
+                greeting.textContent = `Great job, ${name}! Keep up the excellent progress!`;
+                
+                // Check if this employee has saved progress
+                if (name !== currentEmployeeName) {
+                    currentEmployeeName = name;
+                    const savedProgress = await loadProgressFromFirebase(name);
+                    
+                    if (savedProgress) {
+                        const confirmLoad = confirm(`Welcome back, ${name}! We found your previous progress. Would you like to continue where you left off?`);
+                        if (confirmLoad) {
+                            await loadSavedProgress(savedProgress);
+                        }
+                    }
+                }
+            } else {
+                greeting.textContent = '';
+                currentEmployeeName = '';
+            }
+            
+            updateSubmitButton();
+        });
+
+        document.getElementById('acknowledgmentCheckbox').addEventListener('change', function() {
+            updateSubmitButton();
+        });
+
+        document.getElementById('submitButton').addEventListener('click', function() {
+            if (!this.disabled) {
+                submitAcknowledgment();
+            }
+        });
+
+        document.getElementById('saveButton').addEventListener('click', async function() {
+            const name = document.getElementById('employeeName').value.trim();
+            if (!name) {
+                alert('Please enter your name before saving progress.');
+                return;
+            }
+            
+            const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            
+            try {
+                await saveProgressToFirebase(name, completedItems);
+                const message = `Progress saved for ${name}! ${completed} of ${totalItems} items completed.`;
+                alert(message + '\n\nYour progress has been saved and will be available when you return.');
+            } catch (error) {
+                alert('Error saving progress. Please try again or contact support if the problem persists.');
+                console.error('Save error:', error);
+            }
+        });
+
+        // Initialize the widget when page loads
+        initializeWidget();
     </script>
 </body>
 </html>
