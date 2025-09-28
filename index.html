@@ -143,6 +143,131 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* Input field fixes for Google Sites */
+        #employeeName {
+            position: relative !important;
+            z-index: 1 !important;
+        }
+
+        #employeeName:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 2px #3b82f6 !important;
+        }
+
+        /* Prevent any pseudo-elements from creating overlays */
+        #employeeName::before,
+        #employeeName::after {
+            display: none !important;
+        }
+
+        /* Ensure no fixed positioning on input or its container */
+        .max-w-6xl {
+            position: relative !important;
+        }
+
+        /* Force remove any potential overlays */
+        body::before,
+        body::after,
+        *::before,
+        *::after {
+            position: static !important;
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.success {
+            background-color: #22c55e;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+        }
+
+        .notification.warning {
+            background-color: #f59e0b;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Custom modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .modal-button.primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            background-color: #2563eb;
+        }
+
+        .modal-button.secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-button.secondary:hover {
+            background-color: #d1d5db;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-8">
@@ -501,6 +626,200 @@
             totalItems += items.length;
         });
 
+        // Notification function to replace alerts
+        function showNotification(message, type = 'success') {
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Custom modal function to replace confirm()
+        function showConfirmModal(message, onConfirm, onCancel) {
+            // First, remove any existing modals
+            const existingModals = document.querySelectorAll('.modal-overlay');
+            existingModals.forEach(modal => modal.remove());
+
+            // Create modal overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+
+            // Create modal content
+            const modal = document.createElement('div');
+            modal.className = 'modal-content';
+
+            // Add message
+            const messageEl = document.createElement('p');
+            messageEl.textContent = message;
+            messageEl.style.marginBottom = '20px';
+            messageEl.style.lineHeight = '1.5';
+
+            // Create buttons container
+            const buttonsEl = document.createElement('div');
+            buttonsEl.className = 'modal-buttons';
+
+            // Create cancel button
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'modal-button secondary';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = () => {
+                overlay.remove();
+                if (onCancel) onCancel();
+            };
+
+            // Create confirm button
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'modal-button primary';
+            confirmBtn.textContent = 'Continue';
+            confirmBtn.onclick = () => {
+                overlay.remove();
+                if (onConfirm) onConfirm();
+            };
+
+            // Assemble modal
+            buttonsEl.appendChild(cancelBtn);
+            buttonsEl.appendChild(confirmBtn);
+            modal.appendChild(messageEl);
+            modal.appendChild(buttonsEl);
+            overlay.appendChild(modal);
+
+            // Add to page
+            document.body.appendChild(overlay);
+
+            // Close on outside click
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    if (onCancel) onCancel();
+                }
+            };
+        }
+
+        // Nuclear option - remove ANY potential overlay elements
+        function nuclearCleanup() {
+            console.log('Running nuclear cleanup...');
+            
+            // Remove any element with overlay-like properties
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                const styles = window.getComputedStyle(el);
+                
+                // Check for overlay characteristics
+                const isOverlay = (
+                    styles.position === 'fixed' ||
+                    styles.position === 'absolute'
+                ) && (
+                    (styles.backgroundColor && (
+                        styles.backgroundColor.includes('rgba') ||
+                        styles.backgroundColor === 'rgba(0, 0, 0, 0.5)' ||
+                        styles.backgroundColor.includes('rgb(0, 0, 0)')
+                    )) ||
+                    (styles.background && styles.background.includes('rgba')) ||
+                    parseInt(styles.zIndex) > 100
+                );
+                
+                // Don't remove our own elements
+                const isOurElement = el.closest('#progressTracker') || 
+                                   el.id === 'progressTracker' ||
+                                   el.classList.contains('notification');
+                
+                if (isOverlay && !isOurElement) {
+                    console.log('Nuclear cleanup removing element:', el);
+                    el.remove();
+                }
+            });
+            
+            // Also check for any elements that might be blocking clicks
+            const clickBlockers = document.querySelectorAll('[style*="pointer-events"]');
+            clickBlockers.forEach(el => {
+                const styles = window.getComputedStyle(el);
+                if (styles.pointerEvents === 'auto' && styles.position === 'fixed') {
+                    console.log('Removing potential click blocker:', el);
+                    el.remove();
+                }
+            });
+        }
+
+        // Function to aggressively clean up any overlays
+        function forceCleanupOverlays() {
+            // Remove any elements that might be creating overlays
+            const potentialOverlays = [
+                '.modal-overlay',
+                '[style*="position: fixed"]',
+                '[style*="position:fixed"]',
+                '[style*="z-index"]'
+            ];
+            
+            potentialOverlays.forEach(selector => {
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        const styles = window.getComputedStyle(el);
+                        if (styles.position === 'fixed' && 
+                            (styles.backgroundColor.includes('rgba') || styles.background.includes('rgba'))) {
+                            console.log('Found potential overlay element:', el);
+                            el.remove();
+                        }
+                    });
+                } catch (e) {
+                    // Ignore selector errors
+                }
+            });
+            
+            // Check for any elements with high z-index that might be overlays
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                const styles = window.getComputedStyle(el);
+                if (styles.zIndex && parseInt(styles.zIndex) > 999 && 
+                    styles.position === 'fixed' &&
+                    (styles.backgroundColor.includes('rgba') || styles.opacity < 1)) {
+                    console.log('Found high z-index overlay:', el);
+                    el.remove();
+                }
+            });
+            
+            // Run nuclear cleanup as last resort
+            nuclearCleanup();
+        }
+
+        // Function to clean up any leftover modals
+        function cleanupModals() {
+            // Remove modal overlays
+            const existingModals = document.querySelectorAll('.modal-overlay');
+            existingModals.forEach(modal => {
+                console.log('Removing modal overlay'); // Debug log
+                modal.remove();
+            });
+            
+            // Also check for any orphaned modal elements
+            const orphanedModals = document.querySelectorAll('[class*="modal"]');
+            orphanedModals.forEach(element => {
+                if (element.classList.contains('modal-overlay') || 
+                    element.classList.contains('modal-content') || 
+                    element.classList.contains('modal-buttons')) {
+                    console.log('Removing orphaned modal element'); // Debug log
+                    element.remove();
+                }
+            });
+            
+            // Force cleanup any other potential overlays
+            forceCleanupOverlays();
+        }
+
         // Firebase functions - Updated for multi-day structure
         async function saveProgressToFirebase(employeeName, progressData) {
             if (!employeeName || !window.firebaseDB) return;
@@ -770,17 +1089,17 @@
 
             // Validation checks
             if (!employeeName) {
-                alert('Please enter your name at the beginning of the checklist to complete, enter your name and click Submit again');
+                showNotification('Please enter your name at the beginning of the checklist to complete, enter your name and click Submit again', 'warning');
                 return;
             }
 
             if (completed !== totalItems) {
-                alert('It looks like you have not completed all the tasks, please go back and complete tasks and ensure you have checked off the tasks in the checklist');
+                showNotification('It looks like you have not completed all the tasks, please go back and complete tasks and ensure you have checked off the tasks in the checklist', 'warning');
                 return;
             }
 
             if (!acknowledgmentChecked) {
-                alert('Please check the acknowledgment checkbox to confirm you have completed all tasks');
+                showNotification('Please check the acknowledgment checkbox to confirm you have completed all tasks', 'warning');
                 return;
             }
 
@@ -800,10 +1119,10 @@
                     // Save acknowledgment completion to Firebase
                     saveAcknowledmentToFirebase(employeeName);
                     
-                    alert('Congratulations on completing your first days training modules for "New Hire: Orientation and Core Polices", when ready you can begin Day 2 Training');
+                    showNotification('Congratulations on completing your first days training modules for "New Hire: Orientation and Core Polices", when ready you can begin Day 2 Training', 'success');
                 }, function(error) {
                     console.log('FAILED...', error);
-                    alert('Acknowledgement email failed to send, please call Monica and inform her of the error');
+                    showNotification('Acknowledgement email failed to send, please call Monica and inform her of the error', 'error');
                 });
         }
 
@@ -818,13 +1137,26 @@
                 // Check if this employee has saved progress
                 if (name !== currentEmployeeName) {
                     currentEmployeeName = name;
-                    const savedProgress = await loadProgressFromFirebase(name);
                     
-                    if (savedProgress) {
-                        const confirmLoad = confirm(`Welcome back, ${name}! We found your previous progress. Would you like to continue where you left off?`);
-                        if (confirmLoad) {
-                            await loadSavedProgress(savedProgress);
+                    try {
+                        const savedProgress = await loadProgressFromFirebase(name);
+                        
+                        // Only show modal if there's actually saved progress
+                        if (savedProgress && savedProgress.completedItems && Object.keys(savedProgress.completedItems).length > 0) {
+                            showConfirmModal(
+                                `Welcome back, ${name}! We found your previous progress. Would you like to continue where you left off?`,
+                                async () => {
+                                    await loadSavedProgress(savedProgress);
+                                },
+                                () => {
+                                    // User chose not to load progress, continue with empty state
+                                }
+                            );
                         }
+                        // If no progress found, do nothing - no modal needed
+                    } catch (error) {
+                        console.error('Error checking for saved progress:', error);
+                        // Don't show any modal on error
                     }
                 }
             } else {
@@ -848,7 +1180,7 @@
         document.getElementById('saveButton').addEventListener('click', async function() {
             const name = document.getElementById('employeeName').value.trim();
             if (!name) {
-                alert('Please enter your name before saving progress.');
+                showNotification('Please enter your name before saving progress.', 'warning');
                 return;
             }
             
@@ -856,16 +1188,53 @@
             
             try {
                 await saveProgressToFirebase(name, completedItems);
-                const message = `Progress saved for ${name}! ${completed} of ${totalItems} items completed.`;
-                alert(message + '\n\nYour progress has been saved and will be available when you return.');
+                const message = `Progress saved for ${name}! ${completed} of ${totalItems} items completed. Your progress has been saved and will be available when you return.`;
+                showNotification(message, 'success');
             } catch (error) {
-                alert('Error saving progress. Please try again or contact support if the problem persists.');
+                showNotification('Error saving progress. Please try again or contact support if the problem persists.', 'error');
                 console.error('Save error:', error);
             }
         });
-        // test comment
+
         // Initialize the widget when page loads
         initializeWidget();
+
+        // Add global click listener to help debug overlay issues
+        document.addEventListener('click', function(e) {
+            console.log('Click detected on:', e.target);
+            console.log('Element classes:', e.target.className);
+            console.log('Element styles:', window.getComputedStyle(e.target));
+            
+            // If clicking seems to clear an overlay, log what was clicked
+            if (e.target.style && 
+                (e.target.style.position === 'fixed' || 
+                 window.getComputedStyle(e.target).position === 'fixed')) {
+                console.log('Clicked on fixed position element - this might be the overlay!');
+                forceCleanupOverlays();
+            }
+        });
+
+        // Also add a manual cleanup function you can call from console
+        window.debugCleanup = function() {
+            console.log('Manual cleanup triggered');
+            forceCleanupOverlays();
+            cleanupModals();
+        };
+
+        // Add a nuclear cleanup you can call manually
+        window.nuclearCleanup = function() {
+            console.log('Manual nuclear cleanup triggered');
+            nuclearCleanup();
+        };
+
+        // Add a function to make the input field completely safe
+        window.fixInput = function() {
+            const input = document.getElementById('employeeName');
+            input.style.cssText = 'position: relative !important; z-index: 1 !important; background: white !important;';
+            input.blur();
+            input.focus();
+            nuclearCleanup();
+        };
     </script>
 </body>
 </html>
