@@ -985,16 +985,11 @@
             
             const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
             
-            // Show immediate feedback that save is starting
-            showNotification('Saving your progress...', 'success');
-            
             try {
                 await saveProgressToFirebase(name, completedItems);
                 
-                // Show success message after save completes
-                setTimeout(() => {
-                    showNotification(`Perfect! Progress saved for ${name}. You've completed ${completed} of ${totalItems} training items. Your progress will be available when you return.`, 'success');
-                }, 800);
+                // Use the same notification approach that works for auto-loading
+                showNotification(`Progress saved! ${name}, your ${completed} completed items have been saved and will be available when you return.`, 'success');
                 
             } catch (error) {
                 showNotification('Error saving progress. Please try again or contact support if the problem persists.', 'error');
