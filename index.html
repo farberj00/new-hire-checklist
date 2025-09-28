@@ -575,61 +575,45 @@
             console.log('Attempting to detect logged-in user...');
             
             try {
-                // Try to detect Google user from various sources
-                const detectionMethods = [
-                    // Method 1: Check for Google account info in page
-                    () => {
-                        const scripts = document.querySelectorAll('script');
-                        for (let script of scripts) {
-                            if (script.textContent && script.textContent.includes('@gmail.com')) {
-                                const emailMatch = script.textContent.match(/([a-zA-Z0-9._%+-]+@gmail\.com)/);
-                                if (emailMatch) {
-                                    const email = emailMatch[1];
-                                    const name = email.split('@')[0].replace(/[._]/g, ' ');
-                                    return name.charAt(0).toUpperCase() + name.slice(1);
-                                }
+                // Method 1: Check for Google Sites context and user info
+                if (window.parent && window.parent !== window) {
+                    try {
+                        const referrer = document.referrer;
+                        if (referrer.includes('sites.google.com')) {
+                            console.log('Running in Google Sites iframe');
+                            // In Google Sites, check URL parameters or page context
+                            const urlParams = new URLSearchParams(window.location.search);
+                            if (urlParams.has('user')) {
+                                return decodeURIComponent(urlParams.get('user'));
                             }
                         }
-                        return null;
-                    },
-                    
-                    // Method 2: Check browser's stored Google info (if accessible)
-                    async () => {
-                        try {
-                            const response = await fetch('https://www.google.com/accounts', { 
-                                method: 'HEAD', 
-                                credentials: 'include' 
-                            });
-                            return null; // This is just a connectivity check
-                        } catch {
-                            return null;
-                        }
-                    },
-                    
-                    // Method 3: Check for Google Sites user context
-                    () => {
-                        if (window.parent && window.parent !== window) {
-                            try {
-                                const parentUrl = document.referrer;
-                                if (parentUrl.includes('sites.google.com')) {
-                                    // In Google Sites iframe - could potentially extract user info
-                                    console.log('Running in Google Sites iframe');
-                                }
-                            } catch (e) {
-                                console.log('Cannot access parent frame info');
-                            }
-                        }
-                        return null;
+                    } catch (e) {
+                        console.log('Cannot access parent frame info');
                     }
-                ];
+                }
                 
-                // Try each detection method
-                for (let method of detectionMethods) {
-                    const result = await method();
-                    if (result) {
-                        console.log('User detected:', result);
-                        return result;
+                // Method 2: Check for email in page scripts or meta tags
+                const scripts = document.querySelectorAll('script');
+                for (let script of scripts) {
+                    if (script.textContent && script.textContent.includes('@')) {
+                        const emailMatch = script.textContent.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+                        if (emailMatch) {
+                            const email = emailMatch[1];
+                            const name = email.split('@')[0].replace(/[._]/g, ' ');
+                            return name.charAt(0).toUpperCase() + name.slice(1);
+                        }
                     }
+                }
+                
+                // Method 3: Check localStorage for previously saved user
+                try {
+                    const lastUser = localStorage.getItem('lastTrainingUser');
+                    if (lastUser) {
+                        console.log('Found previous user in localStorage:', lastUser);
+                        return lastUser;
+                    }
+                } catch (e) {
+                    console.log('localStorage not accessible');
                 }
                 
                 console.log('No user auto-detected, will use manual entry');
@@ -1120,11 +1104,18 @@
                 await saveProgressToFirebase(name, completedItems);
                 console.log('Save completed successfully for:', name);
                 
+                // Store user for future detection
+                try {
+                    localStorage.setItem('lastTrainingUser', name);
+                } catch (e) {
+                    console.log('Could not save user to localStorage');
+                }
+                
                 // For auto-detected users, try a different notification approach
                 if (userDetected) {
                     const greeting = document.getElementById('nameGreeting');
                     const originalText = greeting.textContent;
-                    greeting.textContent = `✅ Progress saved! ${completed}/${totalItems} items completed.`;
+                    greeting.textContent = `Progress saved! ${completed}/${totalItems} items completed.`;
                     greeting.style.color = '#22c55e';
                     
                     setTimeout(() => {
