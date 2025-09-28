@@ -570,59 +570,43 @@
             totalItems += items.length;
         });
 
-        // Auto-detect logged-in user
-        async function detectLoggedInUser() {
+        // Auto-detect logged-in user (CORS-free version)
+        function detectLoggedInUser() {
             console.log('Attempting to detect logged-in user...');
             
+            // Method 1: Check localStorage for previously saved user (most reliable)
             try {
-                // Method 1: Check for Google Sites context and user info
-                if (window.parent && window.parent !== window) {
-                    try {
-                        const referrer = document.referrer;
-                        if (referrer.includes('sites.google.com')) {
-                            console.log('Running in Google Sites iframe');
-                            // In Google Sites, check URL parameters or page context
-                            const urlParams = new URLSearchParams(window.location.search);
-                            if (urlParams.has('user')) {
-                                return decodeURIComponent(urlParams.get('user'));
-                            }
-                        }
-                    } catch (e) {
-                        console.log('Cannot access parent frame info');
-                    }
+                const lastUser = localStorage.getItem('lastTrainingUser');
+                if (lastUser) {
+                    console.log('Found previous user in localStorage:', lastUser);
+                    return lastUser;
                 }
-                
-                // Method 2: Check for email in page scripts or meta tags
-                const scripts = document.querySelectorAll('script');
-                for (let script of scripts) {
-                    if (script.textContent && script.textContent.includes('@')) {
-                        const emailMatch = script.textContent.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-                        if (emailMatch) {
-                            const email = emailMatch[1];
-                            const name = email.split('@')[0].replace(/[._]/g, ' ');
-                            return name.charAt(0).toUpperCase() + name.slice(1);
-                        }
-                    }
-                }
-                
-                // Method 3: Check localStorage for previously saved user
+            } catch (e) {
+                console.log('localStorage not accessible');
+            }
+            
+            // Method 2: Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('user')) {
+                const user = decodeURIComponent(urlParams.get('user'));
+                console.log('Found user in URL parameters:', user);
+                return user;
+            }
+            
+            // Method 3: Check if running in Google Sites iframe
+            if (window.parent && window.parent !== window) {
                 try {
-                    const lastUser = localStorage.getItem('lastTrainingUser');
-                    if (lastUser) {
-                        console.log('Found previous user in localStorage:', lastUser);
-                        return lastUser;
+                    const referrer = document.referrer;
+                    if (referrer.includes('sites.google.com')) {
+                        console.log('Running in Google Sites iframe - no additional user info available');
                     }
                 } catch (e) {
-                    console.log('localStorage not accessible');
+                    console.log('Cannot access parent frame info');
                 }
-                
-                console.log('No user auto-detected, will use manual entry');
-                return null;
-                
-            } catch (error) {
-                console.log('User detection failed:', error);
-                return null;
             }
+            
+            console.log('No user auto-detected, will use manual entry');
+            return null;
         }
 
         // Initialize user detection
