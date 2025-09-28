@@ -978,53 +978,40 @@
 
         document.getElementById('saveButton').addEventListener('click', async function() {
             const name = document.getElementById('employeeName').value.trim();
-            const saveButton = this;
-            const originalText = saveButton.innerHTML;
-            const originalClass = saveButton.className;
             
             if (!name) {
-                // Show warning on button itself
-                saveButton.innerHTML = '⚠️ Enter Name First';
-                saveButton.className = 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-4 px-6 rounded-xl transition-all transform shadow-lg';
-                setTimeout(() => {
-                    saveButton.innerHTML = originalText;
-                    saveButton.className = originalClass;
-                }, 3000);
+                console.log('Please enter your name before saving progress.');
                 return;
             }
             
             const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
             
-            // Show saving status on button
-            saveButton.innerHTML = '💾 Saving...';
-            saveButton.disabled = true;
-            saveButton.className = 'bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform shadow-lg';
-            
             try {
                 await saveProgressToFirebase(name, completedItems);
                 console.log('Save completed successfully');
                 
-                // Show success on button
-                saveButton.innerHTML = `✅ Saved! (${completed}/${totalItems})`;
-                saveButton.className = 'bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform shadow-lg';
-                
-                // Restore button after 3 seconds
+                // Try the exact same notification method that works for auto-loading
+                // Remove any existing notifications first
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+
+                // Create notification using the exact same approach
+                const notification = document.createElement('div');
+                notification.className = 'notification success';
+                notification.textContent = `Progress saved! ${name}, your ${completed} completed items are safely stored.`;
+
+                // Add to page
+                document.body.appendChild(notification);
+
+                // Auto-remove after 5 seconds
                 setTimeout(() => {
-                    saveButton.innerHTML = originalText;
-                    saveButton.className = originalClass;
-                    saveButton.disabled = false;
-                }, 3000);
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
                 
             } catch (error) {
-                saveButton.innerHTML = '❌ Save Failed';
-                saveButton.className = 'bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform shadow-lg';
                 console.error('Save error:', error);
-                
-                setTimeout(() => {
-                    saveButton.innerHTML = originalText;
-                    saveButton.className = originalClass;
-                    saveButton.disabled = false;
-                }, 3000);
             }
         });
 
