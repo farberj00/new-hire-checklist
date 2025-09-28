@@ -979,21 +979,46 @@
         document.getElementById('saveButton').addEventListener('click', async function() {
             const name = document.getElementById('employeeName').value.trim();
             if (!name) {
-                showNotification('Please enter your name before saving progress.', 'warning');
+                // Use existing greeting area for feedback
+                const greeting = document.getElementById('nameGreeting');
+                greeting.textContent = '⚠️ Please enter your name before saving progress.';
+                greeting.style.color = '#f59e0b';
+                setTimeout(() => {
+                    greeting.textContent = `Great job, ${name}! Keep up the excellent progress!`;
+                    greeting.style.color = '';
+                }, 3000);
                 return;
             }
             
             const completed = Object.keys(completedItems).filter(key => completedItems[key]).length;
+            const greeting = document.getElementById('nameGreeting');
+            
+            // Show save feedback in existing greeting area
+            greeting.textContent = `✅ Progress saved! ${name}, your ${completed} completed items have been saved and will be available when you return.`;
+            greeting.style.color = '#22c55e';
+            greeting.style.fontWeight = 'bold';
             
             try {
                 await saveProgressToFirebase(name, completedItems);
+                console.log('Save completed successfully');
                 
-                // Use the same notification approach that works for auto-loading
-                showNotification(`Progress saved! ${name}, your ${completed} completed items have been saved and will be available when you return.`, 'success');
+                // Keep the success message visible longer
+                setTimeout(() => {
+                    greeting.textContent = `Great job, ${name}! Keep up the excellent progress!`;
+                    greeting.style.color = '';
+                    greeting.style.fontWeight = '';
+                }, 4000);
                 
             } catch (error) {
-                showNotification('Error saving progress. Please try again or contact support if the problem persists.', 'error');
+                greeting.textContent = `❌ Error saving progress. Please try again or contact support.`;
+                greeting.style.color = '#ef4444';
                 console.error('Save error:', error);
+                
+                setTimeout(() => {
+                    greeting.textContent = `Great job, ${name}! Keep up the excellent progress!`;
+                    greeting.style.color = '';
+                    greeting.style.fontWeight = '';
+                }, 4000);
             }
         });
 
