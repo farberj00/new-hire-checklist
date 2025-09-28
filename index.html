@@ -964,8 +964,7 @@
             
             try {
                 await saveProgressToFirebase(name, completedItems);
-                const message = `Progress saved for ${name}! ${completed} of ${totalItems} items completed. Your progress has been saved and will be available when you return.`;
-                showNotification(message, 'success');
+                showNotification(`Progress saved for ${name}! ${completed} of ${totalItems} items completed. Your progress has been saved and will be available when you return.`, 'success');
             } catch (error) {
                 showNotification('Error saving progress. Please try again or contact support if the problem persists.', 'error');
                 console.error('Save error:', error);
